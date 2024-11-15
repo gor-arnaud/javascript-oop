@@ -1,7 +1,23 @@
 <html>
-  <script src="./scripts/classes.js"></script>
-  <script lang="js">
-    const person = new Person('Arnaud MICHOUD');
-    console.log(person.direBonjour());
-  </script>
+<script src="./scripts/classes.js"></script>
+<script lang="js">
+  const persons = [];
+  persons.push(new Person('Arnaud MICHOUD'));
+  persons.push(new Person('John DOE'));
+
+  document.addEventListener("DOMContentLoaded", () => {
+    const list = document.getElementById('liste');
+
+    persons.forEach(person => {
+      const listItem = document.createElement('li');
+      listItem.innerHTML = person.direBonjour();
+      list.appendChild(listItem);
+    });
+  });
+</script>
+
+<body>
+  <ul id="liste"></ul>
+</body>
+
 </html>

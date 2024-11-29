@@ -1,4 +1,5 @@
-<html>
+<!DOCTYPE html>
+<html lang="fr">
 
 <head>
   <meta charset="utf-8" />
@@ -16,46 +17,156 @@
       justify-content: space-between;
       justify-items: center;
     }
+
+    select {
+      margin-bottom: 10px;
+    }
   </style>
   <script src="./scripts/classes.js"></script>
   <script lang="js">
-    const persons = [];
-    persons.push(new Professor('Arnaud MICHOUD', 'Javascript'));
-    persons.push(new Student('BELKASSEM Zakariya', 2));
+    const salles = [];
+    let currentSalleIndex = null;
+    let list;
+
+    // Affiche la salle actuellement affichée
+    function displaySalle() {
+      if (currentSalleIndex === null || !salles[currentSalleIndex]) return;
+
+      clearPersons();
+
+      const salle = salles[currentSalleIndex];
+
+      // Affiche le professeur
+      if (salle.professor) {
+        const profItem = document.createElement('li');
+        profItem.classList.add('professor');
+        profItem.innerHTML = `<span>${salle.professor.name} (Professeur) Mateiere: ${salle.professor.teaches}</span>`;
+        list.appendChild(profItem);
+      }
+
+      // Affiche les étudiants
+      salle.students.forEach(student => {
+        const studentItem = document.createElement('li');
+        studentItem.classList.add('student');
+        studentItem.innerHTML = `<span>${student.name} (Étudiant, Année ${student.year})</span>`;
+        list.appendChild(studentItem);
+      });
+    }
+
+    /**
+     * Efface la liste des occupants affichée.
+     */
+    function clearPersons() {
+      while (list.children.length > 0) {
+        list.removeChild(list.firstChild);
+      }
+    }
+
+    /**
+     * Ajoute une nouvelle salle.
+     */
+    function addSalle() {
+      const nom = prompt('Nom de la salle :');
+      if (nom) {
+        const salle = new Salle(nom);
+        salles.push(salle);
+        updateSalleDropdown();
+      }
+    }
+
+    /**
+     * Met à jour le menu déroulant des salles.
+     */
+    function updateSalleDropdown() {
+      const dropdown = document.getElementById('salleSelect');
+      dropdown.innerHTML = '';
+
+      salles.forEach((salle, index) => {
+        const option = document.createElement('option');
+        option.value = index;
+        option.text = salle.nom;
+        dropdown.add(option);
+      });
+
+      if (salles.length > 0 && currentSalleIndex === null) {
+        currentSalleIndex = 0;
+        dropdown.value = 0;
+        displaySalle();
+      }
+    }
+
+    /**
+     * Change la salle affichée.
+     */
+    function changeSalle(index) {
+      currentSalleIndex = parseInt(index);
+      displaySalle();
+    }
+
+    /**
+     * Ajoute un professeur à la salle actuelle.
+     */
+    function addProfessor() {
+      if (currentSalleIndex === null) {
+        alert('Veuillez créer une salle d’abord.');
+        return;
+      }
+
+      const salle = salles[currentSalleIndex];
+      if (salle.professor) {
+        alert("Un seul professeur est autorisé par salle !");
+        return;
+      }
+
+      const name = prompt('Nom du professeur :');
+      const teaches = prompt('Matière enseignée :');
+      const professor = new Professor(name, teaches);
+
+      salle.professor = professor;
+      displaySalle();
+    }
+
+    /**
+     * Ajoute un étudiant à la salle actuelle.
+     */
+    function addStudent() {
+      if (currentSalleIndex === null) {
+        alert('Veuillez créer une salle d’abord.');
+        return;
+      }
+
+      const salle = salles[currentSalleIndex];
+      const name = prompt('Nom de l’élève :');
+      const year = prompt('Année :');
+      const student = new Student(name, year);
+
+      salle.addStudent(student);
+      displaySalle();
+    }
 
     document.addEventListener("DOMContentLoaded", () => {
-      const list = document.getElementById('liste');
+      list = document.getElementById('liste');
 
-      persons.forEach(person => {
-        const listItem = document.createElement('li');
-        const title = document.createElement('span');
-        title.innerText = person.name;
+      const btnAddSalle = document.getElementById('btnAddSalle');
+      const btnAddProf = document.getElementById('btnAddProf');
+      const btnAddStud = document.getElementById('btnAddStud');
+      const salleSelect = document.getElementById('salleSelect');
 
-        if (person instanceof Professor) {
-          listItem.classList.add('professor');
-        }
-
-        if (person instanceof Student) {
-          listItem.classList.add('student');
-        }
-
-        const button = document.createElement('button');
-
-        button.innerText = 'Bonjour';
-        button.onclick = () => {
-          alert(person.direBonjour());
-        }
-
-        listItem.appendChild(title);
-        listItem.appendChild(button);
-        list.appendChild(listItem);
-      });
+      btnAddSalle.addEventListener('click', addSalle);
+      btnAddProf.addEventListener('click', addProfessor);
+      btnAddStud.addEventListener('click', addStudent);
+      salleSelect.addEventListener('change', (e) => changeSalle(e.target.value));
     });
   </script>
 </head>
 
 <body>
+  <h1>Gestion des Salles</h1>
+  <button id="btnAddSalle">Ajouter une salle</button>
+  <select id="salleSelect"></select>
   <ul id="liste"></ul>
+  <button id="btnAddProf">Ajouter un professeur</button>
+  <button id="btnAddStud">Ajouter un étudiant</button>
 </body>
 
 </html>
